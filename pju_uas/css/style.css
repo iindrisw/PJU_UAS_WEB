@@ -1,0 +1,327 @@
+/* =============================================================
+   assets/css/style.css
+   Sistem PJU — Pelaporan Lampu Jalan Mati (Versi Vibrant & Colorful)
+   ============================================================= */
+
+/* ── Variables (Warna Cerah & Neon) ─────────────────────────── */
+:root {
+  --pju-primary:     #06B6D4; /* Cyan / Teal cerah */
+  --pju-primary-dark:#0891B2;
+  --pju-yellow:      #FBBF24; /* Kuning terang */
+  --pju-orange:      #F97316; /* Jingga neon */
+  --pju-dark:        #0F172A; /* Slate gelap untuk teks kontras */
+  --pju-card-bg:     rgba(255, 255, 255, 0.85); /* Efek kaca */
+  --pju-border:      rgba(226, 232, 240, 0.8);
+  --pju-text:        #334155;
+  --pju-text-muted:  #64748B;
+  --pju-sidebar-w:   260px;
+  --pju-radius:      24px;    /* Sudut sangat membulat modern */
+  --pju-shadow:      0 20px 40px -15px rgba(6, 182, 212, 0.1);
+  --pju-shadow-lg:   0 30px 60px -15px rgba(6, 182, 212, 0.2);
+  --transition:      all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  --pju-bg-light:    #F8FAFC;
+}
+
+/* Dark mode */
+[data-bs-theme="dark"] {
+  --pju-card-bg:    rgba(30, 41, 59, 0.9);
+  --pju-border:     rgba(51, 65, 85, 0.5);
+  --pju-text:       #F1F5F9;
+  --pju-text-muted: #94A3B8;
+  --pju-shadow:     0 20px 40px rgba(0, 0, 0, 0.3);
+  --pju-bg-light:   #0F172A;
+}
+
+/* ── Global ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 15px;
+  color: var(--pju-text);
+  background: var(--pju-bg-light);
+  transition: var(--transition);
+  -webkit-font-smoothing: antialiased;
+}
+
+a { text-decoration: none; transition: var(--transition); }
+
+/* ── Scrollbar ──────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--pju-primary); border-radius: 99px; }
+
+/* ── Public Navbar (Soft Glassmorphism) ─────────────────────── */
+.navbar-pju {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 20px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.03) !important;
+}
+
+.navbar-pju .navbar-brand {
+  font-weight: 800;
+  font-size: 1.4rem;
+  color: var(--pju-dark) !important;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.navbar-pju .navbar-brand .brand-icon {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, #22D3EE, #06B6D4);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(6, 182, 212, 0.3);
+}
+
+.navbar-pju .nav-link {
+  color: var(--pju-text-muted) !important;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 10px 20px !important;
+  border-radius: 14px;
+}
+
+.navbar-pju .nav-link:hover,
+.navbar-pju .nav-link.active {
+  color: var(--pju-primary) !important;
+  background: rgba(6, 182, 212, 0.08);
+}
+
+/* ── Hero Section (Mesh Colorful Gradient) ───────────────────── */
+.hero-section-soft {
+  background: 
+    radial-gradient(circle at 80% 20%, rgba(34, 211, 238, 0.25) 0%, transparent 50%),
+    radial-gradient(circle at 20% 80%, rgba(251, 191, 36, 0.2) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(249, 115, 22, 0.1) 0%, transparent 60%),
+    #F8FAFC;
+  padding: 120px 0 100px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-title-soft {
+  font-size: clamp(2.5rem, 5vw, 3.8rem);
+  font-weight: 800;
+  color: var(--pju-dark);
+  letter-spacing: -0.04em;
+  line-height: 1.15;
+}
+
+.hero-title-soft span {
+  background: linear-gradient(135deg, #06B6D4, #3B82F6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-subtitle-soft {
+  color: var(--pju-text-muted);
+  font-size: 1.15rem;
+  line-height: 1.7;
+  font-weight: 500;
+}
+
+/* ── Visual Lampu Kreatif Kanan ─────────────────────────────── */
+.hero-lamp-soft-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 280px;
+  height: 280px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border-radius: 70px;
+  box-shadow: 0 30px 60px rgba(6, 182, 212, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.hero-lamp-soft {
+  font-size: 8.5rem;
+  color: #FBBF24;
+  filter: drop-shadow(0 0 30px rgba(251, 191, 36, 0.6));
+  animation: vibran-glow 2.5s ease-in-out infinite;
+}
+
+@keyframes vibran-glow {
+  0%, 100% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 25px rgba(251, 191, 36, 0.5)); }
+  50%       { transform: scale(1.05) rotate(2deg); filter: drop-shadow(0 0 45px rgba(251, 191, 36, 0.9)); }
+}
+
+/* ── Tombol Akses (Vibrant Buttons) ────────────────────────── */
+.btn-pju-soft-primary, .btn-pju-primary {
+  background: linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%);
+  color: #fff !important;
+  border: none;
+  border-radius: 16px;
+  padding: 16px 36px;
+  font-weight: 700;
+  font-size: 1rem;
+  box-shadow: 0 12px 30px -6px rgba(6, 182, 212, 0.4);
+  transition: var(--transition);
+}
+
+.btn-pju-soft-primary:hover, .btn-pju-primary:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 35px -4px rgba(6, 182, 212, 0.5);
+}
+
+.btn-pju-soft-outline, .btn-pju-outline {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--pju-dark);
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 16px 36px;
+  font-weight: 700;
+  font-size: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  transition: var(--transition);
+}
+
+.btn-pju-soft-outline:hover, .btn-pju-outline:hover {
+  background: #F8FAFC;
+  border-color: var(--pju-primary);
+  color: var(--pju-primary);
+  transform: translateY(-4px);
+}
+
+/* ── Kartu Ringkasan (Glassmorphism Effect) ─────────────────── */
+.card-pju-soft, .card-pju {
+  background: var(--pju-card-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--pju-border);
+  border-radius: var(--pju-radius);
+  box-shadow: var(--pju-shadow);
+  transition: var(--transition);
+  overflow: hidden;
+}
+
+.card-pju-soft:hover, .card-pju:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--pju-shadow-lg);
+}
+
+.card-pju .card-header {
+  background: rgba(248, 250, 252, 0.8);
+  border-bottom: 1px solid var(--pju-border);
+  padding: 20px 24px;
+  color: var(--pju-dark);
+  font-weight: 700;
+}
+
+/* ── Status Info Bulatan Counter ───────────────────────────── */
+.stat-icon {
+  width: 54px; height: 54px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.02);
+}
+
+.stat-value {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--pju-dark);
+}
+
+/* ── Form Styling ───────────────────────────────────────────── */
+.form-control, .form-select {
+  border: 2px solid #E2E8F0;
+  border-radius: 14px;
+  padding: 12px 18px;
+  font-size: 0.98rem;
+  transition: var(--transition);
+  background: #fff;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--pju-primary);
+  box-shadow: 0 0 0 5px rgba(6, 182, 212, 0.15);
+}
+
+/* ── GPS Button ─────────────────────────────────────────────── */
+.btn-gps {
+  background: #ECFDF5;
+  color: #059669;
+  border: 1px solid #A7F3D0;
+  border-radius: 14px;
+  padding: 14px 24px;
+  font-weight: 700;
+}
+
+.btn-gps:hover {
+  background: #D1FAE5;
+  transform: translateY(-2px);
+}
+
+/* ── Tables ─────────────────────────────────────────────────── */
+.table-pju thead th {
+  background: rgba(6, 182, 212, 0.04);
+  padding: 16px;
+  color: var(--pju-primary-dark);
+  font-weight: 800;
+  border-bottom: 2px solid var(--pju-border);
+}
+
+.table-pju tbody td {
+  padding: 16px;
+  border-bottom: 1px solid var(--pju-border);
+}
+
+/* ── Admin Layout ───────────────────────────────────────────── */
+.sidebar {
+  background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);
+}
+
+.sidebar-nav .nav-item.active {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.2) 0%, rgba(59, 130, 246, 0.1) 100%);
+  color: #22D3EE;
+  font-weight: 700;
+  border-left: 4px solid #06B6D4;
+}
+
+/* ── Timeline ───────────────────────────────────────────────── */
+.timeline-item:not(:last-child)::before { background: #E2E8F0; width: 2px; }
+.timeline-note { background: #F8FAFC; border-left: 4px solid var(--pju-primary); border-radius: 12px; }
+
+/* ── Utility ────────────────────────────────────────────────── */
+.animate-fadein { animation: fadein 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Perbaikan teks tenggelam di background gelap */
+.hero-section-soft .hero-subtitle-soft,
+section p.text-muted,
+.card-pju-soft p.text-muted,
+.card-pju-soft .text-muted {
+  color: #94A3B8 !important; /* Abu-abu terang cerah */
+}
+
+/* Memperjelas deskripsi sub-fitur alur penanganan */
+section .text-muted.small, 
+.card-pju-soft p.small {
+  color: #CBD5E1 !important; /* Jauh lebih terang dekat ke putih */
+}
+
+/* Memperjelas sub-teks angka statistik (Total Laporan, Selesai, dll) */
+.card-pju-soft p.fw-700 {
+  color: #38BDF8 !important; /* Beri warna biru langit cerah agar terbaca tajam */
+}

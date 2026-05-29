@@ -1,0 +1,287 @@
+/**
+ * assets/js/app.js
+ * Fungsi JavaScript global — Sistem PJU
+ */
+
+"use strict";
+
+// ── Dark Mode ─────────────────────────────────────────────────
+const DarkMode = {
+  init() {
+    const saved = localStorage.getItem('pju_theme') || 'light';
+    document.documentElement.setAttribute('data-bs-theme', saved);
+    this.updateIcon(saved);
+  },
+  toggle() {
+    const current = document.documentElement.getAttribute('data-bs-theme');
+    const next    = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-bs-theme', next);
+    localStorage.setItem('pju_theme', next);
+    this.updateIcon(next);
+  },
+  updateIcon(theme) {
+    document.querySelectorAll('.dark-toggle i').forEach(el => {
+      el.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+    });
+  }
+};
+
+DarkMode.init();
+
+// ── Sidebar Toggle ────────────────────────────────────────────
+function toggleSidebar() {
+  const sb      = document.getElementById('adminSidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  if (!sb) return;
+  sb.classList.toggle('open');
+  if (overlay) overlay.classList.toggle('open');
+}
+
+// ── GPS Lokasi ────────────────────────────────────────────────
+let mapInstance = null;
+let mapMarker   = null;
+
+function initMapPreview(lat, lng) {
+  if (mapInstance) {
+    mapInstance.setView([lat, lng], 16);
+    if (mapMarker) mapInstance.removeLayer(mapMarker);
+  } else {
+    mapInstance = L.map('map-preview').setView([lat, lng], 16);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(mapInstance);
+  }
+  const lampIcon = L.divIcon({
+    html: '<div style="background:linear-gradient(135deg,#FFB800,#FF6B00);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;box-shadow:0 4px 12px rgba(255,107,0,.5);border:3px solid #fff;"><i class="bi bi-lightbulb-fill"></i></div>',
+    iconSize:   [36, 36],
+    iconAnchor: [18, 18],
+    className:  ''
+  });
+  mapMarker = L.marker([lat, lng], { icon: lampIcon }).addTo(mapInstance);
+  document.getElementById('map-preview').style.display = 'block';
+}
+
+function getLocation() {
+  const btn = document.getElementById('btn-gps');
+  if (!btn) return;
+
+  if (!navigator.geolocation) {
+    Swal.fire('Maaf', 'Browser Anda tidak mendukung GPS.', 'warning');
+    return;
+  }
+
+  btn.classList.add('loading');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="bi bi-arrow-repeat me-2"></i>Mendeteksi...';
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+
+      document.getElementById('latitude').value  = lat.toFixed(8);
+      document.getElementById('longitude').value = lng.toFixed(8);
+
+      btn.classList.remove('loading');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-geo-alt-fill me-2"></i>Lokasi Terdeteksi ✓';
+      btn.style.background = 'linear-gradient(135deg,#10b981,#059669)';
+
+      initMapPreview(lat, lng);
+
+      // Reverse geocoding (Nominatim)
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+        .then(r => r.json())
+        .then(data => {
+          const addr = document.getElementById('alamat_lokasi');
+          if (addr && data.display_name) {
+            addr.value = data.display_name;
+          }
+          if (mapMarker) {
+            mapMarker.bindPopup(`<b>Lokasi Anda</b><br>${data.display_name || 'Lokasi terdeteksi'}`).openPopup();
+          }
+        })
+        .catch(() => {});
+    },
+    (error) => {
+      btn.classList.remove('loading');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-geo-alt me-2"></i>Deteksi Lokasi GPS';
+
+      const msgs = {
+        1: 'Izin lokasi ditolak. Aktifkan izin lokasi di browser.',
+        2: 'Sinyal GPS tidak tersedia. Coba di tempat terbuka.',
+        3: 'Waktu habis. Coba lagi.'
+      };
+      Swal.fire('GPS Error', msgs[error.code] || 'Gagal mendeteksi lokasi.', 'error');
+    },
+    { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+  );
+}
+
+// ── Foto Preview ──────────────────────────────────────────────
+function initFotoPreview() {
+  const input   = document.getElementById('foto');
+  const preview = document.getElementById('foto-preview');
+  const zone    = document.getElementById('upload-zone');
+  if (!input || !preview) return;
+
+  input.addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      Swal.fire('Ukuran Terlalu Besar', 'Maksimal ukuran foto 5MB.', 'warning');
+      this.value = '';
+      return;
+    }
+
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!validTypes.includes(file.type)) {
+      Swal.fire('Format Tidak Didukung', 'Gunakan format JPG, PNG, WebP, atau GIF.', 'warning');
+      this.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      preview.src = e.target.result;
+      preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Drag & drop
+  if (zone) {
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+    zone.addEventListener('dragleave', ()  => zone.classList.remove('dragover'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault();
+      zone.classList.remove('dragover');
+      if (e.dataTransfer.files.length) {
+        input.files = e.dataTransfer.files;
+        input.dispatchEvent(new Event('change'));
+      }
+    });
+    zone.addEventListener('click', () => input.click());
+  }
+}
+
+// ── Form Validation ───────────────────────────────────────────
+function validateLaporanForm(e) {
+  const lat = document.getElementById('latitude')?.value;
+  const lng = document.getElementById('longitude')?.value;
+
+  if (!lat || !lng) {
+    e.preventDefault();
+    Swal.fire({
+      icon: 'warning',
+      title: 'Lokasi Belum Terdeteksi',
+      text: 'Klik tombol "Deteksi Lokasi GPS" terlebih dahulu.',
+      confirmButtonColor: '#FF6B00'
+    });
+    return false;
+  }
+  return true;
+}
+
+// ── Konfirmasi Hapus ──────────────────────────────────────────
+function confirmDelete(url, itemName = 'data ini') {
+  Swal.fire({
+    title: 'Hapus Data?',
+    text: `Apakah Anda yakin ingin menghapus ${itemName}? Aksi ini tidak bisa dibatalkan.`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#ef4444',
+    cancelButtonColor:  '#6b7280',
+    confirmButtonText:  '<i class="bi bi-trash me-1"></i>Ya, Hapus',
+    cancelButtonText:   'Batal'
+  }).then(result => {
+    if (result.isConfirmed) window.location.href = url;
+  });
+}
+
+// ── Update Status via AJAX ────────────────────────────────────
+async function updateStatus(laporanId, newStatus) {
+  const { value: keterangan } = await Swal.fire({
+    title: 'Update Status Laporan',
+    input: 'textarea',
+    inputLabel: 'Keterangan (opsional)',
+    inputPlaceholder: 'Tuliskan keterangan perubahan status...',
+    showCancelButton: true,
+    confirmButtonText: 'Update',
+    confirmButtonColor: '#FF6B00',
+    cancelButtonText: 'Batal'
+  });
+
+  if (keterangan === undefined) return; // dibatalkan
+
+  try {
+    const resp = await fetch(BASE_URL + '/admin/ajax/update_status.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ laporan_id: laporanId, status: newStatus, keterangan })
+    });
+    const data = await resp.json();
+    if (data.success) {
+      Swal.fire({ icon: 'success', title: 'Berhasil!', text: data.message, timer: 2000, showConfirmButton: false });
+      setTimeout(() => location.reload(), 2000);
+    } else {
+      Swal.fire('Gagal', data.message, 'error');
+    }
+  } catch {
+    Swal.fire('Error', 'Terjadi kesalahan jaringan.', 'error');
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  initFotoPreview();
+
+  // GPS button
+  document.getElementById('btn-gps')?.addEventListener('click', getLocation);
+
+  // Laporan form submit guard
+  document.getElementById('form-laporan')?.addEventListener('submit', validateLaporanForm);
+
+  // Search real-time (debounce)
+  let searchTimer;
+  document.getElementById('search-input')?.addEventListener('input', function() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      const url = new URL(window.location.href);
+      url.searchParams.set('search', this.value);
+      url.searchParams.set('page', 1);
+      window.location.href = url.toString();
+    }, 600);
+  });
+
+  // Filter status
+  document.getElementById('filter-status')?.addEventListener('change', function() {
+    const url = new URL(window.location.href);
+    url.searchParams.set('status', this.value);
+    url.searchParams.set('page', 1);
+    window.location.href = url.toString();
+  });
+
+  // Tooltip Bootstrap
+  document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+    new bootstrap.Tooltip(el);
+  });
+
+  // Image lightbox
+  document.querySelectorAll('.foto-thumb').forEach(img => {
+    img.addEventListener('click', () => {
+      Swal.fire({ imageUrl: img.src, imageAlt: 'Foto Laporan', showConfirmButton: false, width: 'auto' });
+    });
+  });
+
+  // Animate cards on load
+  document.querySelectorAll('.stat-card, .card-pju').forEach((el, i) => {
+    el.style.animationDelay = (i * 0.07) + 's';
+    el.classList.add('animate-fadein');
+  });
+});
+
+// ── BASE_URL dari meta tag ─────────────────────────────────────
+const BASE_URL = document.querySelector('meta[name="base-url"]')?.content || '';
